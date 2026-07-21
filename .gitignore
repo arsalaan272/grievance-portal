@@ -1,0 +1,51 @@
+# =========================================================================
+# Root-level .gitignore for Next.js (Frontend) & Express.js (Backend)
+# =========================================================================
+
+# -------------------------------------------------------------------------
+# 1. Security & Environment Variables (CRITICAL)
+# -------------------------------------------------------------------------
+# Never allow credentials, API keys, or secrets into your repository.
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+frontend/.env*
+backend/.env*
+
+# -------------------------------------------------------------------------
+# 2. Dependencies
+# -------------------------------------------------------------------------
+# Avoid pushing massive node_modules folders.
+node_modules/
+frontend/node_modules/
+backend/node_modules/
+
+# -------------------------------------------------------------------------
+# 3. Next.js (Frontend) Build Outputs & Cache
+# -------------------------------------------------------------------------
+frontend/.next/
+frontend/out/
+frontend/build/
+
+# -------------------------------------------------------------------------
+# 4. Express.js (Backend) Build Outputs & Logs
+# -------------------------------------------------------------------------
+backend/dist/
+backend/build/
+backend/out/
+*.log
+backend/*.log
+
+# -------------------------------------------------------------------------
+# 5. OS & IDE Specific Files
+# -------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.env.workspace
+
+/grievance-portal-chat.pdf
+/yestraday-chat.pdf
