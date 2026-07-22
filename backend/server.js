@@ -48,7 +48,7 @@ const app = express();
 connectDB();
 
 app.use(cors({
-  origin: 'https://grievanceflowai.vercel.app',
+  origin: ["https://grievanceflowai.vercel.app","http://localhost:3000"],
   credentials: true
 }));
 
