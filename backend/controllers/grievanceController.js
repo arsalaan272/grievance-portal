@@ -45,18 +45,39 @@ export const createGrievance = async (req, res) => {
 
 
 // get all grievances filed by the logged-in student
+// Resolved ones are excluded — they live in the separate "Resolved" tab (getMyResolvedGrievances)
 export const getMyGrievances = async (req, res) => {
   try {
-    const grievances = await Grievance.find({ student: req.student._id }).sort({ createdAt: -1 });
+    const grievances = await Grievance.find({
+      student: req.student._id,
+      status: { $ne: 'Resolved' },
+    }).sort({ createdAt: -1 });
     res.status(200).json(grievances);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
+// get grievances filed by the logged-in student that have been resolved
+export const getMyResolvedGrievances = async (req, res) => {
+  try {
+    const grievances = await Grievance.find({
+      student: req.student._id,
+      status: 'Resolved',
+    }).sort({ updatedAt: -1 });
+    res.status(200).json(grievances);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// community feed — excludes resolved complaints, only ongoing ones are visible publicly
 export const getCommunityGrievances = async (req, res) => {
   try {
-    const grievances = await Grievance.find({ publishToCommunity: true })
+    const grievances = await Grievance.find({
+      publishToCommunity: true,
+      status: { $ne: 'Resolved' },
+    })
       .populate('student', 'nameAadhar department')
       .sort({ createdAt: -1 });
     res.status(200).json(grievances);
@@ -68,17 +89,18 @@ export const getCommunityGrievances = async (req, res) => {
 
 
 // get grievances assigned to the logged-in staff member
-// HOD sees all NON-escalated ones here; Lecturer/Warden see their category (also non-escalated)
+// HOD sees all NON-escalated, NON-resolved ones here; Lecturer/Warden see their category (same filters)
+// Resolved ones move to the separate Resolved tab (getResolvedGrievances) regardless of escalation state
 export const getAssignedGrievances = async (req, res) => {
   try {
     await runEscalationCheck(); // catch up any grievances that just crossed the 3-day mark
 
     const { role, category } = req.staff;
 
-    // HOD's "All Complaints" tab excludes escalated ones — those live in the separate tab
+    // HOD's "All Complaints" tab excludes escalated and resolved ones — those live in their own tabs
     const filter = role === 'HOD'
-      ? { escalated: false }
-      : { category, escalated: false };
+      ? { escalated: false, status: { $ne: 'Resolved' } }
+      : { category, escalated: false, status: { $ne: 'Resolved' } };
 
     const grievances = await Grievance.find(filter)
       .populate('student', 'nameAadhar rollNo email department')
@@ -92,6 +114,7 @@ export const getAssignedGrievances = async (req, res) => {
 
 
 // get escalated grievances — HOD only
+// Resolved ones are excluded here too — once resolved, it belongs in the Resolved tab, not Escalated
 export const getEscalatedGrievances = async (req, res) => {
   try {
     await runEscalationCheck(); // same reasoning — catch up before returning results
@@ -100,9 +123,33 @@ export const getEscalatedGrievances = async (req, res) => {
       return res.status(403).json({ message: 'Not authorized to view escalated complaints' });
     }
 
-    const grievances = await Grievance.find({ escalated: true })
+    const grievances = await Grievance.find({
+      escalated: true,
+      status: { $ne: 'Resolved' },
+    })
       .populate('student', 'nameAadhar rollNo email department')
       .sort({ escalatedAt: -1 });
+
+    res.status(200).json(grievances);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+// get resolved grievances — staff view
+// HOD sees all resolved complaints; Lecturer/Warden see resolved complaints in their category only
+export const getResolvedGrievances = async (req, res) => {
+  try {
+    const { role, category } = req.staff;
+
+    const filter = role === 'HOD'
+      ? { status: 'Resolved' }
+      : { category, status: 'Resolved' };
+
+    const grievances = await Grievance.find(filter)
+      .populate('student', 'nameAadhar rollNo email department')
+      .sort({ updatedAt: -1 });
 
     res.status(200).json(grievances);
   } catch (error) {
