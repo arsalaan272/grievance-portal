@@ -41,7 +41,9 @@ export const loginStudent = async (req, res) => {
     const { username, password } = req.body;
 
     // "username" here is really the roll number
-    const student = await Student.findOne({ rollNo: username });
+    const student = await Student.findOne({
+  $or: [{ rollNo: username }, { email: username }],
+});
 
     if (!student) {
       return res.status(400).json({ message: 'Invalid username or password' });

@@ -130,18 +130,20 @@ export const updateGrievanceStatus = async (req, res) => {
 
     const { role, category } = req.staff;
 
-    // once escalated, only HOD can act on it — the original lecturer/warden no longer owns it
     if (grievance.escalated && role !== 'HOD') {
       return res.status(403).json({ message: 'This complaint has been escalated to HOD' });
     }
 
-    // non-escalated: normal category check applies
     if (!grievance.escalated && role !== 'HOD' && grievance.category !== category) {
       return res.status(403).json({ message: 'Not authorized to update this grievance' });
     }
 
     grievance.status = status;
     await grievance.save();
+
+    // Emit real-time update to the student who filed this grievance
+    const io = req.app.get('io');
+    io.to(`student_${grievance.student.toString()}`).emit('complaintStatusUpdated', grievance);
 
     res.status(200).json(grievance);
   } catch (error) {

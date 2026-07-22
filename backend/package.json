@@ -10,7 +10,11 @@
     "jsonwebtoken": "^9.0.3",
     "mongodb": "^7.5.0",
     "mongoose": "^9.7.4",
-    "nodemailer": "^9.0.3"
+    "nodemailer": "^9.0.3",
+    "openai": "^6.48.0",
+    "resend": "^6.17.2",
+    "socket.io": "^4.8.3",
+    "socket.io-client": "^4.8.3"
   },
   "name": "backend",
   "version": "1.0.0",
@@ -18,7 +22,7 @@
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start"  : "node server.js" 
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
