@@ -1,6 +1,14 @@
 // 
 import mongoose from 'mongoose'
 
+const SECURITY_QUESTIONS = [
+  "What is your favorite teacher's name?",
+  "What is your favorite book?",
+  "What is the name of your best friend in school?",
+  "What is your favorite subject?",
+  "What is your pet's name?",
+];
+
 const studentSchema = new mongoose.Schema({
   nameAadhar: {
     type: String,
@@ -10,6 +18,10 @@ const studentSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true, // no two students can have the same roll number
+  },
+  dateOfBirth: {
+    type: Date,
+    required: true,
   },
   email: {
     type: String,
@@ -32,6 +44,15 @@ const studentSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  securityQuestion: {
+    type: String,
+    required: true,
+    enum: SECURITY_QUESTIONS,
+  },
+  securityAnswerHash: {
+    type: String,
+    required: true,
+  },
   password: {
     type: String,
     required: true,
@@ -45,5 +66,5 @@ const studentSchema = new mongoose.Schema({
 }, { timestamps: true }); // adds createdAt and updatedAt automatically
 
 
-
+export { SECURITY_QUESTIONS };
 export default mongoose.model('Student', studentSchema);
